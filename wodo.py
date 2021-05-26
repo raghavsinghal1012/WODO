@@ -7,11 +7,64 @@ import os
 import smtplib
 import requests
 import numpy as np
+import time
+import winsound
+from plyer import notification
+import facebook as fb
+
 
 weather_key = os.environ['weather_key']
+insta_ID=os.environ['insta_ID']
+insta_pass=os.environ['insta_pass']
+facebook_key="EAADUAmQfjacBAFikAYuIZBGMbM3OaiHZCcolPG4tABDZCV4UyIi9Vqy2UpCIZByNQ2ZCWQdmu9byzUbfP1C3nahS6mnkrJ0nH4Rfn2oBKsL75aR8w611FUdBz1xARAElKWrLvT4ricLiiIqOah8xCiy1hwjxXAZAEHIiU4NyGeFelbOTO4ZBCZAqMBQ7KPgkZChJdhmZBDUQqn6nM0KWZCncuzC"
+el=fb.GraphAPI(facebook_key)
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[1].id)
+
+def notify(interval,Title,Message):
+    time.sleep(interval)
+    winsound.Beep(2500,2000)
+    notification.notify(
+        title = Title,
+ 	message = Message,
+ 	app_icon =r"C:\Users\owner\Desktop\RAGHAV\icon.ico",
+ 	timeout= 12
+ 	)
+
+def converter(hour,minutes,title,Message):
+    current_time=time.time()
+    current_time=time.ctime(current_time).split()[3].split(":")
+    c_hour=int(current_time[0])
+    c_minute=int(current_time[1])
+    c_second=int(current_time[2])
+    r_second=(hour*60*60)+(minutes*60)
+    if (c_hour<=hour):
+        c_second=(c_hour*60*60)+(c_minute*60)+c_second
+        r_second=r_second-c_second
+        if(r_second>0):
+            notify(r_second,title,Message)
+            return 1
+    return -1
+
+
+def std_time(hour,minutes,parity,title,Message):
+    if(parity=='a' or parity=='A'):
+        if (hour=='12'):
+            hour=0
+            minutes=int(minutes)
+        else:
+            hour=int(hour)
+            minutes=int(minutes)
+    else:
+        if(hour=='12'):
+            hour=int(hour)
+            minutes=int(minutes)
+        else:
+            hour=int(hour)+12
+            minutes=int(minutes)
+
+    return converter(hour,minutes,title,Message)
 
 
 def weather():
@@ -75,6 +128,14 @@ def takeCommand():
         return "None"
     return query
 
+
+def insta(photoname,caption):
+    bot.login(username=insta_ID,password=insta_pass)
+    bot.upload_photo("C:\\Users\\owner\\Desktop\\RAGHAV\\"+photoname+".jpg",caption=caption)
+
+def facebook(photoname,caption):
+    el.put_photo(open("C:\\Users\\owner\\Desktop\\RAGHAV\\"+photoname+".jpg","rb"),message=caption)
+    
 
 def sendEmail(to,content):
     my_email=os.environ['my_email']
@@ -156,14 +217,59 @@ if __name__ == "__main__":
 
         elif 'the time' in query:
             strTime = datetime.datetime.now().strftime("%H:%M:%S")    
-            print(f"Sir, the time is {strTime}")
-            speak(f"Sir, the time is {strTime}")
+            print(f"Sir, the time is {strTime} IST")
+            speak(f"Sir, the time is {strTime} I S T")
             break
+        elif (('instagram' in query)):
+            from instabot import Bot
+
+            bot=Bot()
+            speak("what is the name of the photo")
+            print("what is the name of the photo?")
+            photoname=takeCommand()
+            photoname=photoname.lower()
+            speak("what should be the caption")
+            print("what should be the caption?")
+            caption=takeCommand()
+            print(caption)
+            insta(photoname,caption)
+
+        elif ('facebook' in query):
+            speak("what is the name of the photo")
+            print("what is the name of the photo?")
+            photoname=takeCommand()
+            photoname=photoname.lower()
+            speak("what should be the caption")
+            print("what should be the caption?")
+            caption=takeCommand()
+            print(caption)
+            facebook(photoname,caption)
+
+        elif(('reminder' in query) or ('remind me' in query)):
+            speak("at what time you want me to remind you")
+            print("At what time you want me to remind you?")
+            remind_time=takeCommand().lower()
+            print(remind_time)
+            remind_time=remind_time.split()
+            hour=remind_time[0]
+            minutes=remind_time[2]
+            parity=remind_time[4][0]
+            title='!! Reminder !!'
+            speak("what should be the reminder")
+            print("What should be the reminder?")
+            message=takeCommand()
+            print("Reminder")
+            print(message)
+            if (std_time(hour,minutes,parity,title,message)==1):
+                pass
+            else:
+                print("Wrong time input")
+                
         
         elif 'send an email' in query:
             try:
                 verification()
-                to ="vermasumit923@gmail.com"
+                to =os.environ['my_email']
                 content = takeCommand()
                 sendEmail(to,content)
                 speak("Email has been sent!")
