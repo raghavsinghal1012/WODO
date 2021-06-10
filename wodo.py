@@ -16,7 +16,7 @@ import facebook as fb
 weather_key = os.environ['weather_key']
 insta_ID=os.environ['insta_ID']
 insta_pass=os.environ['insta_pass']
-facebook_key="EAADUAmQfjacBAFikAYuIZBGMbM3OaiHZCcolPG4tABDZCV4UyIi9Vqy2UpCIZByNQ2ZCWQdmu9byzUbfP1C3nahS6mnkrJ0nH4Rfn2oBKsL75aR8w611FUdBz1xARAElKWrLvT4ricLiiIqOah8xCiy1hwjxXAZAEHIiU4NyGeFelbOTO4ZBCZAqMBQ7KPgkZChJdhmZBDUQqn6nM0KWZCncuzC"
+facebook_key=os.environ['facebook_key']
 el=fb.GraphAPI(facebook_key)
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
